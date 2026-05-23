@@ -48,3 +48,28 @@ ggplot(count,
 
 
 ```
+
+
+**1. Create a function that categorizes each exoplanet into a size. Use classification similar to a Milky Way Galaxy planet.**
+
+
+```{r}
+
+#Use pl_rade 
+
+size <- function(radius) {
+  if(is.na(radius)){
+    return("Unknown radius")
+  } else if (radius < 1.25) {
+    return("Simiar size to Earth")
+  } else if(radius < 6){
+    return ("Similar size to Neptune")
+  } else{
+    return("Similar size to Jupiter or larger")
+  }
+}
+
+PSCD$planet_type <- sapply(PSCD$pl_rade, size)
+table(PSCD$planet_type)
+
+```
