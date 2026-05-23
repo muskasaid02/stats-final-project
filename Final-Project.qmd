@@ -5,23 +5,46 @@ editor: visual
 embed-resources: true
 ---
 
-## Quarto
+## Preamble
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+In this lab, you will explore data from NASA's Exoplanet Archive. This archive contains information about confirmed exoplanets discovered outside our Solar System. This dataset includes information about confirmed exoplanets, such as planet name, host star, discovery method, discovery year, discovery facility, planet radius, planet mass, orbital period, star characteristics, and distance form Earth.
 
-## Running Code
+[NASA Exoplanet Archive Data Column Definitions](https://exoplanetarchive.ipac.caltech.edu/docs/API_PS_columns.html)
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
+## Loading Libraries
 
 ```{r}
-#| echo: false
-2 * 2
+
+library(tidyverse)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Data
+
+[Planetary Systems Composite Data Download](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars)
+
+```{r}
+
+PSCD <- read.csv("Planetar_Systems_CompositeData.csv",
+                comment.char = "#")
+```
+
+**1. How many discovery methods have successfully discovered a new exoplanet? Create a barchart showing the number of planets discovered by each discovery method.**
+
+```{r}
+
+count <- PSCD |>
+  count(discoverymethod)
+
+ggplot(count,
+       aes(x = reorder(discoverymethod, n),
+              y = n)) +
+         geom_col() +
+         labs(title = "Number of Exoplanets discovered by each discovery method",
+              x = "Discovery Method",
+              y = "Number of Planets") +
+  coord_flip()
+         
+       
+
+
+```
