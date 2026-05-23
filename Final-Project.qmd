@@ -50,7 +50,7 @@ ggplot(count,
 ```
 
 
-**1. Create a function that categorizes each exoplanet into a size. Use classification similar to a Milky Way Galaxy planet.**
+**2. Create a function that categorizes each exoplanet into a size. Use classification similar to a Milky Way Galaxy planet.**
 
 
 ```{r}
