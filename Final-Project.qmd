@@ -49,9 +49,7 @@ ggplot(count,
 
 ```
 
-
 **2. Create a function that categorizes each exoplanet into a size. Use classification similar to a Milky Way Galaxy planet.**
-
 
 ```{r}
 
@@ -72,4 +70,45 @@ size <- function(radius) {
 PSCD$planet_type <- sapply(PSCD$pl_rade, size)
 table(PSCD$planet_type)
 
+```
+
+**3. How are the different discovery methods related to a planet's proximity from Earth? Make an informative bar chart displaying the difference in the most common distances between each method.**
+
+```{r}
+method_profile <- function(method) {
+  PSCD |>
+    filter(discoverymethod == method) |>
+    summarize(
+      discoverymethod = method,
+      number_of_planets = n(),
+      median_distance = median(sy_dist, na.rm = TRUE)
+    )
+}
+
+method_table <- unique(PSCD$discoverymethod) |>
+  map_dfr(method_profile) |>
+  filter(number_of_planets >= 10) |>
+  arrange(median_distance) |>
+  mutate(discoverymethod = factor(discoverymethod, levels = discoverymethod))
+
+ggplot(method_table,
+       aes(x = median_distance,
+           y = discoverymethod)) +
+  geom_col(fill = "gray34") +
+  geom_text(aes(label = paste("Planets =", number_of_planets)),
+            hjust = -0.05,
+            size = 3.25,
+            fontface = "italic") +
+  expand_limits(x = max(method_table$median_distance) * 1.15) +
+  labs(
+    title = "Median Distance of Exoplanets by Discovery Method",
+    subtitle = "(minimum 10 discovered planets per method)",
+    x = "Median Distance from Earth (parsecs)",
+    y = "Discovery Method"
+  ) +
+  theme(axis.ticks.y = element_blank()) +
+  theme(axis.title.y = element_text(face = 'bold', margin = margin(r = 15)),
+        axis.title.x = element_text(face = 'bold'),
+        axis.text.y = element_text(size = 8, margin = margin(r = -15))
+)
 ```
