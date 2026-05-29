@@ -16,6 +16,7 @@ In this lab, you will explore data from NASA's Exoplanet Archive. This archive c
 ```{r}
 
 library(tidyverse)
+library(knitr)
 ```
 
 ## Data
@@ -111,4 +112,32 @@ ggplot(method_table,
         axis.title.x = element_text(face = 'bold'),
         axis.text.y = element_text(size = 8, margin = margin(r = -15))
 )
+```
+
+**4. Does the distance (sy_dist) of a planetary system from Earth predict the number of planets (sy_pnum) detected? **
+
+sy_pnum = 1.864 - .0001384(sy_dist)
+Due to a p-value of < 2 × 10⁻¹⁶) there is a statistically significant negative relationship between the distance of a planetary system and the number of planets detected. The effect is weak as R^2 = 0.021
+
+```{r}
+
+dist_planets_lm <- lm(sy_pnum ~ sy_dist, 
+                    data = PSCD)
+summary(dist_planets_lm)
+
+broom::tidy(dist_planets_lm)
+broom::glance(dist_planets_lm) |>
+  knitr::kable()
+
+ggplot(PSCD, 
+       aes(x = sy_dist,
+           y = sy_pnum)) +
+  geom_point(alpha = .8) +
+  geom_smooth(method = "lm") +
+  labs(title = "Number of Planets vs Distance from Earth",
+       x = "Distance from Earth",
+       y = "Number of planets in system") 
+  
+
+
 ```
