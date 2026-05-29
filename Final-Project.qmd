@@ -138,6 +138,40 @@ ggplot(PSCD,
        x = "Distance from Earth",
        y = "Number of planets in system") 
   
-
-
 ```
+
+
+**5. Create a function to classify an exoplanet into a mass category compared to Earth's mass (pl_bmasse) **
+
+```{r}
+
+mass_category <- function(mass) {
+  if (is.na(mass)){
+    return(NA)
+  } else if (mass < .06) {
+      return("Similar to Mercury")
+  } else if (mass < .11){
+      return("Similar to Mars")
+  } else if (mass < .82){
+      return("Similar to Venus")
+  } else if (mass < 1.2){
+      return("Similar to Earth")
+  } else if (mass < 14.5){
+      return("Similar to Uranus")
+  } else if (mass < 17.2){
+      return("Similar to Neptune")
+  } else if (mass < 95.2){
+      return("Similar to Saturn")
+  } else if (mass < 317.8){
+      return("Similar to Jupiter")
+  }else {
+      return("Out of Scale")
+  }
+}
+
+PSCD$mass_class <- map_chr(PSCD$pl_bmasse, mass_category)
+table(PSCD$mass_class)
+```
+
+
+
