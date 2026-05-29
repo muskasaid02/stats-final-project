@@ -135,7 +135,7 @@ ggplot(PSCD,
   geom_point(alpha = .8) +
   geom_smooth(method = "lm") +
   labs(title = "Number of Planets vs Distance from Earth",
-       x = "Distance from Earth",
+       x = "Distance from Earth (Parsec)",
        y = "Number of planets in system") 
   
 ```
@@ -171,6 +171,36 @@ mass_category <- function(mass) {
 
 PSCD$mass_class <- map_chr(PSCD$pl_bmasse, mass_category)
 table(PSCD$mass_class)
+```
+
+**6. Does an exoplanet's radius (pl_rade) predict its mass (pl_bmasse)? **
+
+
+pl_masse = -160.173 + 95.270(pl_rade)
+
+The regression indicates a statistically significant (p < 2.2 × 10⁻¹⁶) relationship between exoplanet mass and radius. The regression model has an R^2 of .207 which indicates that about 20.7% of the variastions in exoplanet mass can be explained by the differences in exoplanet radius. 
+```{r}
+
+mass_radius_lm <- lm(pl_bmasse ~ pl_rade, 
+                     data = PSCD)
+
+summary(mass_radius_lm)
+
+broom::tidy(mass_radius_lm)
+broom::glance(mass_radius_lm) |>
+  knitr::kable()
+
+ggplot(PSCD,
+       aes(x = pl_rade,
+           y = pl_bmasse)) +
+  geom_point(alpha = 0.8) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Exoplanet Mass vs Radius",
+    x = "Planet Radius (Earth Radii)",
+    y = "Planet Mass (Earth Masses)"
+  )
+
 ```
 
 
