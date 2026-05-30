@@ -114,10 +114,9 @@ ggplot(method_table,
 )
 ```
 
-**4. Does the distance (sy_dist) of a planetary system from Earth predict the number of planets (sy_pnum) detected? **
+**4. Does the distance (sy_dist) of a planetary system from Earth predict the number of planets (sy_pnum) detected?**
 
-sy_pnum = 1.864 - .0001384(sy_dist)
-Due to a p-value of < 2 × 10⁻¹⁶) there is a statistically significant negative relationship between the distance of a planetary system and the number of planets detected. The effect is weak as R^2 = 0.021
+sy_pnum = 1.864 - .0001384(sy_dist) Due to a p-value of \< 2 × 10⁻¹⁶) there is a statistically significant negative relationship between the distance of a planetary system and the number of planets detected. The effect is weak as R\^2 = 0.021
 
 ```{r}
 
@@ -140,8 +139,7 @@ ggplot(PSCD,
   
 ```
 
-
-**5. Create a function to classify an exoplanet into a mass category compared to Earth's mass (pl_bmasse) **
+**5. Create a function to classify an exoplanet into a mass category compared to Earth's mass (pl_bmasse)**
 
 ```{r}
 
@@ -173,12 +171,12 @@ PSCD$mass_class <- map_chr(PSCD$pl_bmasse, mass_category)
 table(PSCD$mass_class)
 ```
 
-**6. Does an exoplanet's radius (pl_rade) predict its mass (pl_bmasse)? **
-
+**6. Does an exoplanet's radius (pl_rade) predict its mass (pl_bmasse)?**
 
 pl_masse = -160.173 + 95.270(pl_rade)
 
-The regression indicates a statistically significant (p < 2.2 × 10⁻¹⁶) relationship between exoplanet mass and radius. The regression model has an R^2 of .207 which indicates that about 20.7% of the variastions in exoplanet mass can be explained by the differences in exoplanet radius. 
+The regression indicates a statistically significant (p \< 2.2 × 10⁻¹⁶) relationship between exoplanet mass and radius. The regression model has an R\^2 of .207 which indicates that about 20.7% of the variastions in exoplanet mass can be explained by the differences in exoplanet radius.
+
 ```{r}
 
 mass_radius_lm <- lm(pl_bmasse ~ pl_rade, 
@@ -203,5 +201,325 @@ ggplot(PSCD,
 
 ```
 
+Selected variables used in the remaining questions:
 
+| Variable | Meaning | How it is used in this lab |
+|------------------------|------------------------|------------------------|
+| `disc_year` | Year the planet discovery was announced | Tracks how discoveries changed over time |
+| `disc_facility` | Facility, telescope, or mission credited with discovery | Compares discovery sources |
+| `pl_orbper` | Orbital period in days | Compares how long planets take to orbit their host stars |
+| `pl_eqt` | Planet equilibrium temperature in Kelvin | Helps identify simple temperature-based candidates |
+| `sy_snum` | Number of stars in the system | Used in the simulation question |
+| `st_teff` | Stellar effective temperature in Kelvin | Included in the missingness check |
 
+**7. How have exoplanet discoveries changed over time? Create a line chart showing the number of planets discovered each year, and make a table of the five years with the most discoveries.**
+
+```{r}
+
+discoveries_by_year <- PSCD |>
+  filter(!is.na(disc_year)) |>
+  count(disc_year, name = "planets_discovered") |>
+  arrange(disc_year)
+
+top_discovery_years <- discoveries_by_year |>
+  arrange(desc(planets_discovered)) |>
+  slice_head(n = 5)
+
+top_discovery_years |>
+  kable(
+    col.names = c("Discovery Year", "Planets Discovered"),
+    caption = "Five years with the most exoplanet discoveries"
+  )
+
+ggplot(discoveries_by_year,
+       aes(x = disc_year,
+           y = planets_discovered)) +
+  geom_line(color = "gray35", linewidth = 1) +
+  geom_point(color = "gray20") +
+  geom_point(data = top_discovery_years,
+             color = "firebrick",
+             size = 3) +
+  labs(
+    title = "Exoplanet Discoveries by Year",
+    subtitle = "Red points show the five years with the most discoveries",
+    x = "Discovery Year",
+    y = "Number of Planets Discovered"
+  )
+
+```
+
+The discovery counts are not evenly spread across time. The table identifies the largest discovery years, and the plot shows the overall increase in confirmed exoplanets after major survey missions began finding large numbers of planets.
+
+**8. Create a function that identifies simple rocky-zone candidates. Classify a planet as a `"Rocky-zone candidate"` if its radius is between 0.5 and 2 Earth radii and its equilibrium temperature is between 180 K and 310 K. Use the function to summarize the dataset and display the 10 closest candidates to Earth.**
+
+```{r}
+
+rocky_zone_class <- function(radius, temp) {
+  if (is.na(radius) | is.na(temp)) {
+    return("Missing information")
+  } else if (radius >= 0.5 & radius <= 2 & temp >= 180 & temp <= 310) {
+    return("Rocky-zone candidate")
+  } else {
+    return("Not candidate")
+  }
+}
+
+PSCD_candidate <- PSCD |>
+  mutate(
+    rocky_zone_candidate = map2_chr(pl_rade, pl_eqt, rocky_zone_class)
+  )
+
+candidate_summary <- PSCD_candidate |>
+  count(rocky_zone_candidate, name = "number_of_planets") |>
+  mutate(percent_of_dataset = 100 * number_of_planets / sum(number_of_planets)) |>
+  arrange(desc(number_of_planets))
+
+candidate_summary |>
+  kable(
+    digits = 2,
+    col.names = c("Candidate Category", "Number of Planets", "Percent of Dataset"),
+    caption = "Simple rocky-zone candidate classification"
+  )
+
+PSCD_candidate |>
+  filter(rocky_zone_candidate == "Rocky-zone candidate") |>
+  arrange(sy_dist) |>
+  select(pl_name, hostname, discoverymethod, disc_year, pl_rade, pl_eqt, sy_dist) |>
+  slice_head(n = 10) |>
+  kable(
+    digits = 2,
+    col.names = c("Planet", "Host Star", "Discovery Method", "Discovery Year",
+                  "Radius (Earth Radii)", "Equilibrium Temp (K)",
+                  "Distance (Parsecs)"),
+    caption = "Ten closest simple rocky-zone candidates"
+  )
+
+```
+
+This is only a simple classroom classification, not a scientific claim that the planets are habitable. It is still useful because it combines two variables and gives a smaller group of planets that students can investigate more carefully.
+
+**9. Write a data-frame function that summarizes a numeric variable by discovery method. Use your function to compare orbital periods across discovery methods with at least 20 planets that have orbital-period data.**
+
+```{r}
+
+method_numeric_summary <- function(df, variable, min_planets = 20) {
+  if (!is.data.frame(df)) {
+    stop("The first input must be a data frame.")
+  }
+  
+  if (!is.numeric(min_planets) | length(min_planets) != 1 | min_planets <= 0) {
+    stop("min_planets must be one positive number.")
+  }
+  
+  df |>
+    filter(!is.na({{ variable }}),
+           !is.na(discoverymethod)) |>
+    group_by(discoverymethod) |>
+    summarize(
+      number_of_planets = n(),
+      q1 = quantile({{ variable }}, 0.25, na.rm = TRUE),
+      median_value = median({{ variable }}, na.rm = TRUE),
+      q3 = quantile({{ variable }}, 0.75, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    filter(number_of_planets >= min_planets) |>
+    arrange(median_value)
+}
+
+orbital_period_summary <- method_numeric_summary(PSCD, pl_orbper, min_planets = 20)
+
+orbital_period_summary |>
+  kable(
+    digits = 2,
+    col.names = c("Discovery Method", "Number of Planets", "Q1",
+                  "Median Orbital Period", "Q3"),
+    caption = "Orbital-period summaries by discovery method"
+  )
+
+ggplot(orbital_period_summary,
+       aes(y = reorder(discoverymethod, median_value),
+           x = median_value)) +
+  geom_pointrange(aes(xmin = q1,
+                      xmax = q3),
+                  linewidth = 0.7) +
+  scale_x_log10() +
+  labs(
+    title = "Typical Orbital Period by Discovery Method",
+    subtitle = "Points show medians; lines show the middle 50% of values",
+    x = "Orbital Period in Days (log scale)",
+    y = "Discovery Method"
+  )
+
+```
+
+The function makes it easy to reuse the same summary for another numeric variable later. In this result, transit discoveries tend to have much shorter orbital periods than imaging discoveries, which makes sense because transit surveys are better at repeatedly seeing planets that pass in front of their stars often.
+
+**10. Use iteration to check data quality. For the variables `pl_rade`, `pl_bmasse`, `pl_orbper`, `pl_eqt`, `sy_dist`, `st_teff`, and `st_mass`, create a table and plot showing the percent of missing values in each variable.**
+
+```{r}
+
+important_vars <- c("pl_rade", "pl_bmasse", "pl_orbper",
+                    "pl_eqt", "sy_dist", "st_teff", "st_mass")
+
+missing_summary <- map_dfr(important_vars, function(var_name) {
+  PSCD |>
+    summarize(
+      variable = var_name,
+      missing_count = sum(is.na(.data[[var_name]])),
+      percent_missing = 100 * mean(is.na(.data[[var_name]]))
+    )
+}) |>
+  arrange(desc(percent_missing))
+
+missing_summary |>
+  kable(
+    digits = 2,
+    col.names = c("Variable", "Missing Count", "Percent Missing"),
+    caption = "Missing values in selected exoplanet variables"
+  )
+
+ggplot(missing_summary,
+       aes(x = percent_missing,
+           y = reorder(variable, percent_missing))) +
+  geom_col(fill = "gray40") +
+  labs(
+    title = "Missing Data in Selected Variables",
+    x = "Percent Missing",
+    y = "Variable"
+  )
+
+```
+
+This check is important because not every exoplanet has every measurement available. For example, a variable with more missing data should be interpreted more carefully in later models or comparisons.
+
+**11. Challenge question: Use simulation to test whether nearby planetary systems have a different proportion of single-star systems than expected by random chance. Define nearby systems as systems with `sy_dist` less than or equal to the median distance in the dataset.**
+
+```{r}
+
+distance_cutoff <- median(PSCD$sy_dist, na.rm = TRUE)
+
+systems_with_distance <- PSCD |>
+  filter(!is.na(sy_dist),
+         !is.na(sy_snum))
+
+nearby_systems <- systems_with_distance |>
+  filter(sy_dist <= distance_cutoff)
+
+observed_single_star_prop <- nearby_systems |>
+  summarize(prop_single_star = mean(sy_snum == 1)) |>
+  pull(prop_single_star)
+
+simulate_single_star_prop <- function(star_count_pool, sample_size) {
+  sampled_star_counts <- sample(star_count_pool,
+                                size = sample_size,
+                                replace = FALSE)
+  
+  mean(sampled_star_counts == 1)
+}
+
+set.seed(331)
+
+simulated_single_star_props <- map_dbl(
+  1:10000,
+  ~ simulate_single_star_prop(systems_with_distance$sy_snum, nrow(nearby_systems))
+)
+
+simulation_results <- tibble(
+  observed_nearby_prop = observed_single_star_prop,
+  simulated_mean_prop = mean(simulated_single_star_props),
+  lower_tail_p_value = (sum(simulated_single_star_props <= observed_single_star_prop) + 1) /
+    (length(simulated_single_star_props) + 1)
+)
+
+simulation_results |>
+  kable(
+    digits = 4,
+    col.names = c("Observed Nearby Proportion",
+                  "Mean Simulated Proportion",
+                  "Lower-Tail P-Value"),
+    caption = "Simulation test for the proportion of nearby single-star systems"
+  )
+
+tibble(prop_single_star = simulated_single_star_props) |>
+  ggplot(aes(x = prop_single_star)) +
+  geom_histogram(bins = 35,
+                 fill = "gray70",
+                 color = "white") +
+  geom_vline(xintercept = observed_single_star_prop,
+             color = "firebrick",
+             linewidth = 1.2) +
+  labs(
+    title = "Simulation Distribution for Single-Star Proportion",
+    subtitle = "Red line shows the observed proportion among nearby systems",
+    x = "Simulated Proportion of Single-Star Systems",
+    y = "Number of Simulations"
+  )
+
+```
+
+The simulation compares the nearby systems to random samples of the same size from the full dataset. If the observed red line is far in the tail of the simulation distribution, then the nearby systems do not look like a random sample of the full dataset with respect to the number of stars in the system.
+
+**12. Challenge question: Build a ranked table of the 10 most Earth-like and nearby planets using a custom scoring function. A lower score should mean the planet is closer to Earth radius, closer to 288 K, and closer to Earth.**
+
+```{r}
+
+score_rescale <- function(x) {
+  if (!is.numeric(x)) {
+    stop("Input must be numeric.")
+  }
+  
+  x_range <- range(x, na.rm = TRUE)
+  
+  if (x_range[1] == x_range[2]) {
+    return(rep(0, length(x)))
+  }
+  
+  (x - x_range[1]) / (x_range[2] - x_range[1])
+}
+
+planet_rankings <- PSCD_candidate |>
+  filter(!is.na(pl_rade),
+         !is.na(pl_eqt),
+         !is.na(sy_dist)) |>
+  mutate(
+    radius_difference = abs(pl_rade - 1),
+    temp_difference = abs(pl_eqt - 288),
+    radius_score = score_rescale(radius_difference),
+    temp_score = score_rescale(temp_difference),
+    distance_score = score_rescale(sy_dist),
+    earth_like_score = radius_score + temp_score + distance_score
+  ) |>
+  arrange(earth_like_score) |>
+  select(pl_name, hostname, discoverymethod, disc_year, pl_rade,
+         pl_eqt, sy_dist, earth_like_score) |>
+  slice_head(n = 10)
+
+planet_rankings |>
+  kable(
+    digits = 3,
+    col.names = c("Planet", "Host Star", "Discovery Method", "Discovery Year",
+                  "Radius (Earth Radii)", "Equilibrium Temp (K)",
+                  "Distance (Parsecs)", "Earth-Like Score"),
+    caption = "Ten lowest-scoring planets using the custom Earth-like score"
+  )
+
+ggplot(planet_rankings,
+       aes(x = earth_like_score,
+           y = reorder(pl_name, earth_like_score),
+           fill = discoverymethod)) +
+  geom_col() +
+  labs(
+    title = "Lowest Custom Earth-Like Scores",
+    x = "Earth-Like Score (Lower is More Similar/Nearby)",
+    y = "Planet"
+  ) +
+  guides(fill = guide_legend(title = "Discovery Method"))
+
+```
+
+## References
+
+-   NASA Exoplanet Archive. Planetary Systems Composite Parameters. https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+-   NASA Exoplanet Archive. Planetary Systems Composite Parameters column definitions. https://exoplanetarchive.ipac.caltech.edu/docs/API_PS_columns.html
+-   Tidyverse documentation for `dplyr`, `ggplot2`, `purrr`, and `tidyr`. https://www.tidyverse.org/packages/
+-   R documentation for base functions including `sample()`, `median()`, `quantile()`, and `range()`. https://www.r-project.org/other-docs.html
