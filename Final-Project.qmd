@@ -11,6 +11,24 @@ In this lab, you will explore data from NASA's Exoplanet Archive. This archive c
 
 [NASA Exoplanet Archive Data Column Definitions](https://exoplanetarchive.ipac.caltech.edu/docs/API_PS_columns.html)
 
+**Variables needed in this lab**
+
+| Variable | Meaning | How it is used in this lab |
+|------------------|------------------|------------------|
+| `discoverymethod` | Method used to detect the exoplanet | Compares discovery techniques and summarizes discovery outcomes |
+| `disc_year` | Year the planet discovery was announced | Tracks how discoveries changed over time |
+| `disc_facility` | Facility, telescope, or mission credited with discovery | Compares discovery sources |
+| `pl_rade` | Planet radius in Earth radii | Used for size classifications and radius-mass analyses |
+| `pl_bmasse` | Planet mass in Earth masses | Used for mass classifications and radius-mass analyses |
+| `pl_orbper` | Orbital period in days | Compares how long planets take to orbit their host stars |
+| `pl_eqt` | Planet equilibrium temperature in Kelvin | Used to identify simple rocky-zone candidates |
+| `sy_dist` | Distance from Earth in parsecs | Examines planetary system distance and Earth-like rankings |
+| `sy_pnum` | Number of planets in the planetary system | Used in the distance-versus-planet-count analysis |
+| `sy_snum` | Number of stars in the system | Used in the simulation question |
+| `st_teff` | Stellar effective temperature in Kelvin | Included in the missing-data analysis |
+| `st_mass` | Stellar mass in solar masses | Included in the missing-data analysis |
+| `pl_name` | Planet name | Used to identify planets in summary tables |
+| `hostname` | Name of the host star | Provides context for planet-level summaries |
 ## Loading Libraries
 
 ```{r}
@@ -29,7 +47,8 @@ PSCD <- read.csv("Planetar_Systems_CompositeData.csv",
                 comment.char = "#")
 ```
 
-**1. How many discovery methods have successfully discovered a new exoplanet? Create a barchart showing the number of planets discovered by each discovery method.**
+**1. Explore the discovery methods used in the dataset. Create a summary showing how many planets were discovered by each method and visualize the results with an informative bar chart.**
+
 
 ```{r}
 
@@ -50,7 +69,7 @@ ggplot(count,
 
 ```
 
-**2. Create a function that categorizes each exoplanet into a size. Use classification similar to a Milky Way Galaxy planet.**
+**2. Create a function that classifies exoplanets into size categories using planet radius (`pl_rade`). Use the function to summarize the dataset and identify the most common size categories.**
 
 ```{r}
 
@@ -114,7 +133,7 @@ ggplot(method_table,
 )
 ```
 
-**4. Does the distance (sy_dist) of a planetary system from Earth predict the number of planets (sy_pnum) detected?**
+**4. Investigate whether the distance of a planetary system from Earth (`sy_dist`) is related to the number of planets detected in that system (`sy_pnum`). Use a linear regression model, summarize the model results, and visualize the relationship.**
 
 sy_pnum = 1.864 - .0001384(sy_dist) Due to a p-value of \< 2 × 10⁻¹⁶) there is a statistically significant negative relationship between the distance of a planetary system and the number of planets detected. The effect is weak as R\^2 = 0.021
 
@@ -139,7 +158,8 @@ ggplot(PSCD,
   
 ```
 
-**5. Create a function to classify an exoplanet into a mass category compared to Earth's mass (pl_bmasse)**
+
+**5. Create a function that classifies exoplanets into mass categories using planet mass (`pl_bmasse`) and familiar Solar System planets as reference points. Use the function to summarize the distribution of mass categories in the dataset.**
 
 ```{r}
 
@@ -171,8 +191,8 @@ PSCD$mass_class <- map_chr(PSCD$pl_bmasse, mass_category)
 table(PSCD$mass_class)
 ```
 
-**6. Does an exoplanet's radius (pl_rade) predict its mass (pl_bmasse)?**
 
+**6. Examine the relationship between exoplanet radius (`pl_rade`) and exoplanet mass (`pl_bmasse`). Fit a linear regression model, summarize the results, and create a visualization that helps interpret the relationship.**
 pl_masse = -160.173 + 95.270(pl_rade)
 
 The regression indicates a statistically significant (p \< 2.2 × 10⁻¹⁶) relationship between exoplanet mass and radius. The regression model has an R\^2 of .207 which indicates that about 20.7% of the variastions in exoplanet mass can be explained by the differences in exoplanet radius.
@@ -201,16 +221,6 @@ ggplot(PSCD,
 
 ```
 
-Selected variables used in the remaining questions:
-
-| Variable | Meaning | How it is used in this lab |
-|------------------------|------------------------|------------------------|
-| `disc_year` | Year the planet discovery was announced | Tracks how discoveries changed over time |
-| `disc_facility` | Facility, telescope, or mission credited with discovery | Compares discovery sources |
-| `pl_orbper` | Orbital period in days | Compares how long planets take to orbit their host stars |
-| `pl_eqt` | Planet equilibrium temperature in Kelvin | Helps identify simple temperature-based candidates |
-| `sy_snum` | Number of stars in the system | Used in the simulation question |
-| `st_teff` | Stellar effective temperature in Kelvin | Included in the missingness check |
 
 **7. How have exoplanet discoveries changed over time? Create a line chart showing the number of planets discovered each year, and make a table of the five years with the most discoveries.**
 
