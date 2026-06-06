@@ -1,0 +1,130 @@
+---
+title: "Final-Project"
+format: html
+editor: visual
+embed-resources: true
+---
+
+## Preamble
+
+In this lab, you will explore data from NASA's Exoplanet Archive. This archive contains information about confirmed exoplanets discovered outside our Solar System. This dataset includes information about confirmed exoplanets, such as planet name, host star, discovery method, discovery year, discovery facility, planet radius, planet mass, orbital period, star characteristics, and distance from Earth.
+
+[NASA Exoplanet Archive Data Column Definitions](https://exoplanetarchive.ipac.caltech.edu/docs/API_PS_columns.html)
+
+**Variables needed in this lab**
+
+| Variable | Meaning | How it is used in this lab |
+|------------------------|------------------------|------------------------|
+| `discoverymethod` | Method used to detect the exoplanet | Compares discovery techniques and summarizes discovery outcomes |
+| `disc_year` | Year the planet discovery was announced | Tracks how discoveries changed over time |
+| `disc_facility` | Facility, telescope, or mission credited with discovery | Compares discovery sources |
+| `pl_rade` | Planet radius in Earth radii | Used for size classifications and radius-mass analyses |
+| `pl_bmasse` | Planet mass in Earth masses | Used for mass classifications and radius-mass analyses |
+| `pl_orbper` | Orbital period in days | Compares how long planets take to orbit their host stars |
+| `pl_eqt` | Planet equilibrium temperature in Kelvin | Used to identify simple rocky-zone candidates |
+| `sy_dist` | Distance from Earth in parsecs | Examines planetary system distance and Earth-like rankings |
+| `sy_pnum` | Number of planets in the planetary system | Used in the distance-versus-planet-count analysis |
+| `sy_snum` | Number of stars in the system | Used in the simulation question |
+| `st_teff` | Stellar effective temperature in Kelvin | Included in the missing-data analysis |
+| `st_mass` | Stellar mass in solar masses | Included in the missing-data analysis |
+| `pl_name` | Planet name | Used to identify planets in summary tables |
+| `hostname` | Name of the host star | Provides context for planet-level summaries |
+
+## Loading Libraries
+
+```{r}
+
+library(tidyverse)
+library(knitr)
+```
+
+## Data
+
+[Planetary Systems Composite Data Download](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars)
+
+```{r}
+
+PSCD <- read.csv("Planetar_Systems_CompositeData.csv",
+                comment.char = "#")
+```
+
+**1. Explore the discovery methods used in the dataset. Create a summary showing how many planets were discovered by each method and visualize the results with an informative bar chart.**
+
+```{r}
+
+```
+
+**2. Create a function that classifies exoplanets into size categories using planet radius (`pl_rade`). Use the function to summarize the dataset and identify the most common size categories.**
+
+```{r}
+
+#Use pl_rade 
+
+```
+
+**3. How are the different discovery methods related to a planet's proximity from Earth? Make an informative bar chart displaying the difference in the most common distances between each method.**
+
+```{r}
+
+```
+
+**4. Investigate whether the distance of a planetary system from Earth (`sy_dist`) is related to the number of planets detected in that system (`sy_pnum`). Use a linear regression model, summarize the model results, and visualize the relationship.**
+
+```{r}
+
+```
+
+**5. Create a function that classifies exoplanets into mass categories using planet mass (`pl_bmasse`) and familiar Solar System planets as reference points. Use the function to summarize the distribution of mass categories in the dataset.**
+
+```{r}
+
+```
+
+**6. Examine the relationship between exoplanet radius (`pl_rade`) and exoplanet mass (`pl_bmasse`). Fit a linear regression model, summarize the results, and create a visualization that helps interpret the relationship.**
+
+```{r}
+
+```
+
+**7. How have exoplanet discoveries changed over time? Create a line chart showing the number of planets discovered each year, and make a table of the five years with the most discoveries.**
+
+```{r}
+
+```
+
+**8. Create a function that identifies simple rocky-zone candidates. Classify a planet as a `"Rocky-zone candidate"` if its radius is between 0.5 and 2 Earth radii and its equilibrium temperature is between 180 K and 310 K. Use the function to summarize the dataset and display the 10 closest candidates to Earth.**
+
+```{r}
+
+```
+
+**9. Write a data-frame function that summarizes a numeric variable by discovery method. Use your function to compare orbital periods across discovery methods with at least 20 planets that have orbital-period data.**
+
+```{r}
+
+```
+
+**10. Use iteration to check data quality. For the variables `pl_rade`, `pl_bmasse`, `pl_orbper`, `pl_eqt`, `sy_dist`, `st_teff`, and `st_mass`, create a table and plot showing the percent of missing values in each variable.**
+
+```{r}
+
+```
+
+**11. Challenge question: Use simulation to test whether nearby planetary systems have a different proportion of single-star systems than expected by random chance. Define nearby systems as systems with `sy_dist` less than or equal to the median distance in the dataset.**
+
+```{r}
+
+```
+
+**12. Challenge question: Build a ranked table of the 10 most Earth-like and nearby planets using a custom scoring function. A lower score should mean the planet is closer to Earth radius, closer to 288 K, and closer to Earth.**
+
+```{r}
+
+```
+
+## References
+
+-   NASA Exoplanet Archive. Planetary Systems Composite Parameters. https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+-   NASA Exoplanet Archive. Planetary Systems Composite Parameters column definitions. https://exoplanetarchive.ipac.caltech.edu/docs/API_PS_columns.html
+-   Tidyverse documentation for `dplyr`, `ggplot2`, `purrr`, and `tidyr`. https://www.tidyverse.org/packages/
+-   R documentation for base functions including `sample()`, `median()`, `quantile()`, and `range()`. https://www.r-project.org/other-docs.html
